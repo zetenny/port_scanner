@@ -1,31 +1,38 @@
 #!/usr/bin/python3
 
-from progressbar import ProgressBar
-from colorama import Fore, Style
 import socket
-from datetime import datetime
+import time
+from tqdm import tqdm
+import colorama
+from colorama import Fore, Style
 
-bar = ProgressBar()
-def scan(ip, port):
+ip = input('target host: ')
+scan_range_min, scan_range_max = input('range(min max): ').split()
+lista = []
+
+def scan(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(0.5)
     try:
-        s.connect((ip, port))
-    except:
-        return False
-    else:
-        return True
-ip = input("TARGET: ")
-lista = []
-i1 = datetime.now()
-for port in bar(range(0, 1025)):    # here you can modify the scan range
-    if scan(ip, port):
+        connect = s.connect((ip, port))
         lista.append(port)
-i2 = datetime.now()
-print('\n', 'Scan time: ', i2 - i1, '\n')
+        connect.close()
+    except:
+        pass
+
+start = time.perf_counter()
+
+for i in tqdm(range(int(scan_range_min), int(scan_range_max))):
+    if scan(i):
+        pass
+
+finish = time.perf_counter()
+print(f'\n Scan time: {round(finish-start, 2)}seconds \n')
 
 for i in lista:
-    print('Port ' + Fore.GREEN + str(i) + Style.RESET_ALL + ' is open!')
+    print(f'Port {Fore.GREEN}{i}{Style.RESET_ALL} is open!')
 
-asd = 1025 - int(len(lista))
-print(f'\n The other {Fore.RED}{asd}{Style.RESET_ALL} scanned ports are closed or filtered!')
+print()
+
+closed_ports = int(scan_range_max) - len(lista)
+print(f'{Fore.RED}{closed_ports}{Style.RESET_ALL} scanned ports are closed or filtered!')
